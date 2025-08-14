@@ -8,6 +8,40 @@ function Dashboard() {
   const [intradayData, setIntradayData] = useState([]);
   const [graph, setGraph] = useState(true);
   const [fetchedCompanies, setFetchedCompanies] = useState(false);
+  const [prediction, setPred] = useState(0);
+
+  const fetchIntraday = (ticker) => {
+    if (!ticker) return; // prevent empty requests
+    setGraph(false);
+    axios
+      .get(
+        `${
+          import.meta.env.VITE_BACKEND
+        }/companies-intraday?tickers=${ticker}&interval=5m`
+      )
+      .then((res) => {
+        const companyData = res.data.find((c) => c.ticker === ticker);
+        setSelectedCompany(companyData);
+        setIntradayData(companyData.intraday_data);
+        setGraph(true);
+      })
+      .catch((err) => console.error(err));
+  };
+
+  const fetchPrediction = (ticker) => {
+    if (!ticker) return; // prevent empty requests
+    setGraph(false); // optional: use same graph toggle
+
+    axios
+      .post(`${import.meta.env.VITE_BACKEND}/predict-tomorrow`, { ticker })
+      .then((res) => {
+        if (res.data && res.data.predicted_price) {
+          setPred(res.data.predicted_price); // store in state
+          setGraph(true); // optional: show graph or update UI
+        }
+      })
+      .catch((err) => console.error(err));
+  };
 
   useEffect(() => {
     axios
@@ -18,22 +52,6 @@ function Dashboard() {
       })
       .catch((err) => console.error(err));
   }, []);
-
-  const fetchIntraday = (ticker) => {
-    if (!ticker) return; // prevent empty requests
-    setGraph(false);
-    axios
-      .get(
-        `${import.meta.env.VITE_BACKEND}/companies-intraday?tickers=${ticker}&interval=5m`
-      )
-      .then((res) => {
-        const companyData = res.data.find((c) => c.ticker === ticker);
-        setSelectedCompany(companyData);
-        setIntradayData(companyData.intraday_data);
-        setGraph(true);
-      })
-      .catch((err) => console.error(err));
-  };
 
   const plotData = selectedCompany
     ? [
@@ -63,7 +81,10 @@ function Dashboard() {
           {companies.map((c) => (
             <li
               key={c.ticker}
-              onClick={() => fetchIntraday(c.ticker)}
+              onClick={() => {
+                fetchIntraday(c.ticker);
+                fetchPrediction(c.ticker);
+              }}
               className="cursor-pointer p-2 rounded hover:bg-gray-700 mb-1"
             >
               {c.company_name} ({c.ticker})
@@ -123,6 +144,10 @@ function Dashboard() {
               <div className="bg-gray-100 p-4 rounded shadow">
                 <p className="font-semibold">Avg Volume</p>
                 <p>{selectedCompany.average_volume}</p>
+              </div>
+              <div className="bg-gray-100 p-4 rounded shadow">
+                <p className="font-semibold">Tomorrow's Prediction</p>
+                <p className={`${prediction<close?"text-red-500":"text-green-500"}`}>{prediction}</p>
               </div>
             </div>
           </div>
