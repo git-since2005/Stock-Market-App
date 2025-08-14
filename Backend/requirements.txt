@@ -8,5 +8,5 @@ passlib[bcrypt]
 python-jose
 yfinance
 pandas
-pmdarima
 statsmodels
+pmdarima --only-binary :all:
