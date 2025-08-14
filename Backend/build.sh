@@ -8,4 +8,4 @@ pip install --upgrade pip
 pip install numpy==1.26.4 Cython
 
 # Then install everything else
-pip install -r requirements.txt
+pip install -r Backend/requirements.txt
