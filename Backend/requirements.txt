@@ -1,6 +1,6 @@
 numpy>=1.21.2
 fastapi
-uvicorn
+uvicorn[standard]
 sqlalchemy
 psycopg2-binary
 python-dotenv
