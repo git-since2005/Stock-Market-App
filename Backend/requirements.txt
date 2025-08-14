@@ -9,4 +9,4 @@ python-jose
 yfinance
 pandas
 statsmodels
-pmdarima --only-binary :all:
+pmdarima
